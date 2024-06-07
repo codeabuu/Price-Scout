@@ -45,7 +45,6 @@ async def search(metadata, page, search_text):
     await page.wait_for_load_state()
     return page
 
-
 async def get_products(page, search_text, selector, get_product):
     print("getting products")
     product_divs = await page.query_selector_all(selector)
@@ -83,7 +82,7 @@ def post_results(results, endpoint, search_text, source):
     data = {"data": results, "search_text": search_text, "source": source}
 
     print("Sending request to", endpoint)
-    response = POST("http://localhost:5000" + endpoint, headers=headers, json=data)
+    response = post("http://localhost:5000" + endpoint, headers=headers, json=data)
 
     print("Status code:", response.status_code)
 
