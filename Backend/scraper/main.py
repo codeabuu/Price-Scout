@@ -2,7 +2,7 @@ import asyncio
 from playwright.async_api import async_playwright
 import json
 import os
-from amazon import get_product as get_amazon_product
+from scraper.amazon import get_product as get_amazon_product
 from requests import post
 
 AMAZON = "https://amazon.ca"
@@ -17,11 +17,13 @@ URLS = {
 
 available_urls = URLS.keys()
 
+
 def load_auth():
-    FILE = os.path.join("C:\\Users\\Admin\\Desktop\\prp\\Price-Scout\\Backend\\scraper", "auth.json")
+    FILE = os.path.join("scraper", "auth.json")
     with open(FILE, "r") as f:
         return json.load(f)
-    
+
+# place your bright data credentials in auth.json file with keys: "username", "password" and "host"
 cred = load_auth()
 auth = f'{cred["username"]}:{cred["password"]}'
 browser_url = f'wss://{auth}@{cred["host"]}'
@@ -40,13 +42,14 @@ async def search(metadata, page, search_text):
         button = await page.wait_for_selector(search_button_query)
         await button.click()
     else:
-        raise Exception("Search not complete")
-    
+        raise Exception("Could not search.")
+
     await page.wait_for_load_state()
     return page
 
+
 async def get_products(page, search_text, selector, get_product):
-    print("getting products")
+    print("Retreiving products.")
     product_divs = await page.query_selector_all(selector)
     valid_products = []
     words = search_text.split(" ")
@@ -58,7 +61,7 @@ async def get_products(page, search_text, selector, get_product):
 
                 if not product["price"] or not product["url"]:
                     return
-                
+
                 for word in words:
                     if not product["name"] or word.lower() not in product["name"].lower():
                         break
@@ -68,10 +71,11 @@ async def get_products(page, search_text, selector, get_product):
 
     return valid_products
 
+
 def save_results(results):
-    data = {'results': results}
+    data = {"results": results}
     FILE = os.path.join("Scraper", "results.json")
-    with open(FILE, "W") as f:
+    with open(FILE, "w") as f:
         json.dump(data, f)
 
 
@@ -82,17 +86,17 @@ def post_results(results, endpoint, search_text, source):
     data = {"data": results, "search_text": search_text, "source": source}
 
     print("Sending request to", endpoint)
-    response = post("http://localhost:5000" + endpoint, headers=headers, json=data)
-
+    response = post("http://localhost:5000" + endpoint,
+                    headers=headers, json=data)
     print("Status code:", response.status_code)
 
 
 async def main(url, search_text, response_route):
     metadata = URLS.get(url)
     if not metadata:
-        print('Invalid URL.')
+        print("Invalid URL.")
         return
-    
+
     async with async_playwright() as pw:
         print('Connecting to browser.')
         browser = await pw.chromium.connect_over_cdp(browser_url)
@@ -107,14 +111,13 @@ async def main(url, search_text, response_route):
             func = get_amazon_product
         else:
             raise Exception('Invalid URL')
-        
+
         results = await get_products(search_page, search_text, metadata["product_selector"], func)
-        print("Saving results")
+        print("Saving results.")
         post_results(results, response_route, search_text, url)
 
         await browser.close()
-        
-if __name__ == "__main__":
-    asyncio.run(main(AMAZON, "ryzen 9 3950x"))
-    
 
+if __name__ == "__main__":
+    # test script
+    asyncio.run(main(AMAZON, "ryzen 9 3950x"))

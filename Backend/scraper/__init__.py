@@ -1,4 +1,4 @@
-from main import main
+from scraper.main import main
 import sys
 import asyncio
 

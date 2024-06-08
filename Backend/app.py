@@ -1,9 +1,8 @@
 import subprocess
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_cors import CORS
-
 
 app = Flask(__name__)
 CORS(app)
@@ -42,6 +41,79 @@ class TrackedProducts(db.Model):
         self.tracked = tracked
 
 
+@app.route('/add-tracked-product', methods=['POST'])
+def add_tracked_product():
+    name = request.json.get('name')
+    tracked_product = TrackedProducts(name=name)
+    db.session.add(tracked_product)
+    db.session.commit()
+
+    response = {'message': 'Tracked product added successfully', 'id': tracked_product.id}
+    return jsonify(response), 200
+
+
+@app.route('/tracked-products', methods=['GET'])
+def get_tracked_products():
+    tracked_products = TrackedProducts.query.all()
+
+    results = []
+    for product in tracked_products:
+        results.append({
+            'id': product.id,
+            'name': product.name,
+            'created_at': product.created_at,
+            'tracked': product.tracked
+        })
+
+    return jsonify(results), 200
+
+
+@app.route('/tracked-product/<int:product_id>', methods=['PUT'])
+def toggle_tracked_product(product_id):
+    tracked_product = TrackedProducts.query.get(product_id)
+    if tracked_product is None:
+        response = {'message': 'Tracked product not found'}
+        return jsonify(response), 404
+
+    tracked_product.tracked = not tracked_product.tracked
+    db.session.commit()
+
+    response = {'message': 'Tracked product toggled successfully'}
+    return jsonify(response), 200
+
+
+@app.route("/update-tracked-products", methods=["POST"])
+def update_tracked_products():
+    tracked_products = TrackedProducts.query.all()
+    url = "https://amazon.ca"
+
+    product_names = []
+    for tracked_product in tracked_products:
+        name = tracked_product.name
+        if not tracked_product.tracked:
+            continue
+
+        command = f"python ./scraper/__init__.py {url} \"{name}\" /results"
+        subprocess.Popen(command, shell=True)
+        product_names.append(name)
+
+    response = {'message': 'Scrapers started successfully', "products": product_names}
+    return jsonify(response), 200
+
+
+@app.route('/start-scraper', methods=['POST'])
+def start_scraper():
+    url = request.json.get('url')
+    search_text = request.json.get('search_text')
+
+    # Run scraper asynchronously in a separate Python process
+    command = f"python ./scraper/__init__.py {url} \"{search_text}\" /results"
+    subprocess.Popen(command, shell=True)
+
+    response = {'message': 'Scraper started successfully'}
+    return jsonify(response), 200
+
+
 @app.route('/results', methods=['POST'])
 def submit_results():
     results = request.json.get('data')
@@ -52,7 +124,7 @@ def submit_results():
         product_result = ProductResult(
             name=result['name'],
             url=result['url'],
-            img=result['img'],
+            img=result["img"],
             price=result['price'],
             search_text=search_text,
             source=source
@@ -60,20 +132,11 @@ def submit_results():
         db.session.add(product_result)
 
     db.session.commit()
-    response = {'message': 'Received data succesfully'}
+    response = {'message': 'Received data successfully'}
     return jsonify(response), 200
 
 
-@app.route('/unique_search_texts', methods=['GET'])
-def get_unique_search_texts():
-    unique_search_texts = db.session.query(
-        ProductResult.search_text
-    ).distinct().all()
-    unique_search_texts = [text[0] for text in unique_search_texts]
-    return jsonify(unique_search_texts)
-
-
-@app.route('/results')
+@app.route('/results', methods=['GET'])
 def get_product_results():
     search_text = request.args.get('search_text')
     results = ProductResult.query.filter_by(search_text=search_text).order_by(ProductResult.created_at.desc()).all()
@@ -85,18 +148,25 @@ def get_product_results():
             product_dict[url] = {
                 'name': result.name,
                 'url': result.url,
-                'img': result.img,
-                'source': result.source,
-                'created_at': result.created_at,
+                "img": result.img,
+                "source": result.source,
+                "created_at": result.created_at,
                 'priceHistory': []
             }
         product_dict[url]['priceHistory'].append({
             'price': result.price,
             'date': result.created_at
         })
-    formatted_results = list(product_dict.values())
 
+    formatted_results = list(product_dict.values())
     return jsonify(formatted_results)
+
+
+@app.route('/unique_search_texts', methods=['GET'])
+def get_unique_search_texts():
+    unique_search_texts = db.session.query(ProductResult.search_text).distinct().all()
+    unique_search_texts = [text[0] for text in unique_search_texts]
+    return jsonify(unique_search_texts)
 
 
 @app.route('/all-results', methods=['GET'])
@@ -117,79 +187,7 @@ def get_results():
     return jsonify(product_results)
 
 
-@app.route('/start-scraper', methods=['POST'])
-def start_scraper():
-    url = request.json.get('url')
-    search_text = request.json.get('search_text')
-
-    command = f"python ./scraper/__init__.py {url} \"{search_text}\" /results"
-    subprocess.Popen(command, shell=True)
-
-    response = {'message': 'Scraper started successfully'}
-    return jsonify(response), 200
-
-
-@app.route('/add-tracked-product', methods=['POST'])
-def add_tracked_product():
-    name = request.json.get('name')
-    tracked_product = TrackedProducts(name=name)
-    db.session.add(tracked_product)
-    db.session.commit()
-
-    response = {'message': 'Tracked product added successfully', 'id': tracked_product.id}
-    return jsonify(response), 200
-
-
-@app.route('/tracked-product/<int:product_id>', methods=['PUT'])
-def toggle_tracked_product(product_id):
-    tracked_product = TrackedProducts.query.get(product_id)
-    if tracked_product is None:
-        response = {'message': 'Tracked product not found'}
-        return jsonify(response), 404
-    
-    tracked_product.tracked = not tracked_product.tracked
-    db.session.commit()
-
-    response = {'message': 'Tracked product toggled successfully'}
-    return jsonify(response), 200
-
-@app.route('/tracked-products', methods=['GET'])
-def get_tracked_products():
-    tracked_products = TrackedProducts.query.all()
-
-    results = []
-    for product in tracked_products:
-        results.append({
-            'id': product.id,
-            'name': product.name,
-            'created_at': product.created_at,
-            'tracked': product.tracked
-        })
-
-    return jsonify(results), 200
-
-
-@app.route("/update-tracked-products", methods=["POST"])
-def update_tracked_products():
-    tracked_products = TrackedProducts.query.all()
-    url = "https://amazon.ca"
-
-    product_names = []
-    for tracked_product in tracked_products:
-        name = tracked_product.name
-        if not tracked_product.tracked:
-            continue
-
-        command = f"python ./scraper/__init__.py {url} \"{name}\" /results"
-        subprocess.Popen(command, shell=True)
-        product_names.append(name)
-
-    response = {'message': 'Scrapers started successfully',
-                "products": product_names}
-    return jsonify(response), 200
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run()
