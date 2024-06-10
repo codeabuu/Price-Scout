@@ -2,7 +2,7 @@ import React from 'react'
 
 function SearchTextList({ searchTexts, onSearchTextClick }) {
     return (
-        <div>
+        <div className='search-text-list'>
             <h2>All Products</h2>
             <ul>
                 {searchTexts.map((searchText, index) => (

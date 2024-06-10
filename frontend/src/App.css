@@ -1,0 +1,251 @@
+/* General styles */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Main container */
+  .main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 800px; /* Set a maximum width for responsiveness */
+    margin: 0 auto; /* Center the app horizontally */
+  }
+  
+  /* Header */
+  h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Search Form */
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+  }
+  
+  input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    margin-bottom: 10px;
+  }
+  
+  button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #3e8e41;
+  }
+  
+  /* Search Text List */
+  .search-text-list {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+  }
+  
+  .search-text-list-item {
+    display: inline-block;
+    margin: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .search-text-list-item:hover {
+    background-color: #f2f2f2;
+  }
+  
+  /* Tracked Product List (assuming a list of products) */
+  .tracked-product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .tracked-product-list-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .tracked-product-list-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  
+  .tracked-product-list-item h3 {
+    margin: 0;
+    font-size: 1em;
+  }
+  
+  /* Price History Table */
+  .price-history-table {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .price-history-table th,
+  .price-history-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .price-history-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.5em;
+    }
+  
+    input[type="text"],
+    button[type="submit"] {
+      width: 100%;
+    }
+  }
+
+ /* Search Text List */
+.search-text-list {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+  }
+  
+  .search-text-list-item {
+    display: inline-block; /* Adjust display as needed */
+    margin: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .search-text-list-item:hover {
+    background-color: #f2f2f2;
+  }
+  
+  .search-text-list h2 { /* Add styles for the heading if needed */
+    margin: 0;
+    font-size: 1.2em;
+    text-align: center; /* Adjust alignment as needed */
+  }
+  
+  /* Style the buttons within SearchTextList */
+  .search-text-list button {
+    background-color: transparent; /* Remove default button background */
+    border: none; /* Remove default button border */
+    color: inherit; /* Inherit color from parent element */
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 1em; /* Adjust font size as needed */
+    /* Add outline decoration */
+    outline: 1px solid #ddd;
+    outline-offset: 2px; /* Create a small gap between border and outline */
+  }
+  
+  .search-text-list button:hover {
+    text-decoration: underline; /* Add underline on hover */
+  }
+  
+/* Tracked Product List */
+.tracked-product-list {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+  }
+  
+  .tracked-product-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Space out content horizontally */
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .tracked-product-list-item label {
+    font-size: 1em;
+    margin: 0 5px; /* Add some space between label and checkbox */
+  }
+  
+  .tracked-product-list-item input[type="checkbox"] {
+    margin: 0; /* Remove default checkbox margin */
+  }
+  
+  .tracked-product-list-item.tracked { /* Style for "tracked" products */
+    opacity: 0.7; /* Reduce opacity for visually indicating tracked state */
+  }
+  
+  /* Tracked Badge */
+  .tracked-badge {
+    background-color: #4CAF50; /* Green color for tracked badge */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    margin-left: 10px; /* Add some space between checkbox and badge */
+  }
+  
+  
+  /* Add Tracked Product section */
+  .add-tracked-product {
+    margin-top: 20px; /* Add some space above the section */
+    display: flex;
+    align-items: center;
+  }
+  
+  .add-tracked-product input[type="text"] {
+    flex: 1; /* Expand input to fill available space */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    margin-right: 10px; /* Add margin between input and button */
+  }
+  
+  .add-tracked-product button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  
+  .add-tracked-product button:hover {
+    background-color: #3e8e41;
+  }
+  
+  
+  
